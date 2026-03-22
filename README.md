@@ -2,7 +2,7 @@
 ## Puzzle game to cut your lawn
 
 #### Current Status:
-![alt text](./docs/current.png)
+![alt text](./docs/current-lawnmowyer.gif)
 
 ## Core loop
 Cut the lawn, avoid obstacles, don't cut the same lawn twice
