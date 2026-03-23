@@ -18,6 +18,9 @@ var playerPosY = 0
 var gameWidth = 500
 var gameHeight = 500
 var offsetVal = 100
+var sizeW = offsetVal - 1
+var sizeH = offsetVal - 1
+var gameState [4][4]int
 
 type Game struct {
 	keys []ebiten.Key
@@ -28,7 +31,6 @@ func (g *Game) Update() error {
 
 	// fmt.Printf("g keys: %v \n", len(g.keys))
 	if len(g.keys) != 0 {
-
 		userKeyPress = true
 		key := fmt.Sprintf("%v", g.keys[0])
 		if key == "w" || key == "W" || key == "ArrowUp" {
@@ -61,29 +63,44 @@ func (g *Game) Update() error {
 				playerPosX += offsetVal
 			}
 		}
+		playerX := playerPosX / 100
+		playerY := playerPosY / 100
+		gameState[playerY][playerX] = 1
 	}
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	// draw the map
-	sizeW := offsetVal - 1
-	sizeH := offsetVal - 1
 	offsetX := 0
 	offsetY := 0
 
 	ebitenutil.DebugPrint(screen, "Hello, World!")
-	for row := 0; row < (gameHeight-offsetVal)/sizeH; row++ {
-		for i := 0; i < (gameWidth-offsetVal)/sizeW; i++ {
-			vector.FillRect(screen, float32(offsetX), float32(offsetY), float32(sizeW), float32(sizeH), color.RGBA{0, 255, 0, 255}, false)
+
+	for _, row := range gameState {
+		for _, col := range row {
+			// fmt.Println("%v", col)
+			cellColor := color.RGBA{0, 255, 0, 255}
+			if col == 1 {
+				cellColor = color.RGBA{0, 120, 0, 255}
+			}
+			vector.FillRect(screen, float32(offsetX), float32(offsetY), float32(sizeW), float32(sizeH), cellColor, false)
 
 			offsetX += offsetVal
-			// offsetY += 10
 		}
 		offsetX = 0
 		offsetY += offsetVal
 	}
-	// vector.FillRect(screen, 50, 50, 100, 100, color.RGBA{0, 255, 0, 255}, false)
+	// for row := 0; row < (gameHeight-offsetVal)/sizeH; row++ {
+	// 	for i := 0; i < (gameWidth-offsetVal)/sizeW; i++ {
+	// 		vector.FillRect(screen, float32(offsetX), float32(offsetY), float32(sizeW), float32(sizeH), color.RGBA{0, 255, 0, 255}, false)
+	//
+	// 		offsetX += offsetVal
+	// 		// offsetY += 10
+	// 	}
+	// 	offsetX = 0
+	// 	offsetY += offsetVal
+	// }
 
 	// draw player
 	vector.FillRect(screen, float32(playerPosX), float32(playerPosY), float32(sizeW), float32(sizeH), color.RGBA{255, 20, 80, 200}, false)
@@ -92,9 +109,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		time.Sleep(150 * time.Millisecond)
 		userKeyPress = false
 	}
-	if len(g.keys) != 0 {
-		ebitenutil.DebugPrint(screen, fmt.Sprintf("%v", g.keys[0]))
-	}
+	// if len(g.keys) != 0 {
+	// 	ebitenutil.DebugPrint(screen, fmt.Sprintf("%v", g.keys[0]))
+	// }
+	ebitenutil.DebugPrint(screen, fmt.Sprintf("X %v, Y %v", playerPosX, playerPosY))
 
 }
 
@@ -102,9 +120,25 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 	return gameWidth + offsetVal, gameHeight + offsetVal
 }
 
+func createGameState() {
+	for row := 0; row < (gameHeight-offsetVal)/sizeH; row++ {
+		for col := 0; col < (gameWidth-offsetVal)/sizeW; col++ {
+			if row == 0 && col == 0 {
+				gameState[row][col] = 1
+			} else {
+				gameState[row][col] = 0
+			}
+		}
+	}
+	fmt.Printf("row len %v, col len %v ", len(gameState), len(gameState[0]))
+
+}
+
 func main() {
 	ebiten.SetWindowSize(gameWidth*2, gameHeight*2)
 	ebiten.SetWindowTitle("Lawn Mowyer")
+
+	createGameState()
 
 	if err := ebiten.RunGame(&Game{}); err != nil {
 		log.Fatal(err)

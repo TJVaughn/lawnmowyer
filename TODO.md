@@ -8,8 +8,8 @@
 - [x] keypress moves player
 - [x] When user presses key, it only moves them 1 square
 - [x] Add bounds to where they can move
+- [x] as a user goes over a square, the color changes
 ___
-- [ ] as a user goes over a square, the color changes
 - [ ] if all the squares are changed, the level ends
 - [ ] level end state - fail and success
 - [ ] game intro state
