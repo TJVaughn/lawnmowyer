@@ -1,14 +1,18 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"image/color"
 	"log"
+	"os"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/examples/resources/fonts"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
@@ -20,6 +24,7 @@ const (
 	sizeH      = offsetVal - 1
 )
 
+var introState = true
 var userKeyPress = false
 var playerPosX = 0
 var playerPosY = 0
@@ -30,6 +35,14 @@ type Game struct {
 	keys []ebiten.Key
 }
 
+func init() {
+	s, err := text.NewGoTextFaceSource(bytes.NewReader(fonts.MPlus1pRegular_ttf))
+	if err != nil {
+		log.Fatal(err)
+	}
+	mplusFaceSource = s
+}
+
 func (g *Game) Update() error {
 	g.keys = inpututil.AppendPressedKeys(g.keys[:0])
 
@@ -37,6 +50,19 @@ func (g *Game) Update() error {
 	if len(g.keys) != 0 {
 		userKeyPress = true
 		key := fmt.Sprintf("%v", g.keys[0])
+		if introState && key == "Enter" {
+			introState = false
+		}
+		if key == "Escape" {
+			time.Sleep(300 * time.Millisecond)
+			if introState == true {
+				os.Exit(1)
+			}
+			introState = true
+			createGameState()
+			playerPosX = 0
+			playerPosY = 0
+		}
 		if key == "w" || key == "W" || key == "ArrowUp" {
 			if playerPosY <= 0 {
 				playerPosY = 0
@@ -78,7 +104,41 @@ func (g *Game) Update() error {
 	return nil
 }
 
+var (
+	mplusFaceSource *text.GoTextFaceSource
+)
+
+func introScreen(screen *ebiten.Image) {
+
+	const (
+		normalFontSize = 24
+		bigFontSize    = 48
+	)
+	const x = 20
+	title := "Lawn Mowyer"
+	subTit := "Press Enter to Start"
+	op := &text.DrawOptions{}
+	// Draw the sample text
+	op.GeoM.Translate(10, 60)
+	op.ColorScale.ScaleWithColor(color.White)
+	text.Draw(screen, title, &text.GoTextFace{
+		Source: mplusFaceSource,
+		Size:   normalFontSize,
+	}, op)
+
+	op.GeoM.Translate(0, 80)
+	op.ColorScale.ScaleWithColor(color.White)
+	text.Draw(screen, subTit, &text.GoTextFace{
+		Source: mplusFaceSource,
+		Size:   normalFontSize,
+	}, op)
+}
+
 func (g *Game) Draw(screen *ebiten.Image) {
+	if introState == true {
+		introScreen(screen)
+		return
+	}
 	// draw the map
 	offsetX := 0
 	offsetY := 0
@@ -127,7 +187,7 @@ func createGameState() {
 			}
 		}
 	}
-	fmt.Printf("row len %v, col len %v ", len(gameState), len(gameState[0]))
+	// fmt.Printf("row len %v, col len %v ", len(gameState), len(gameState[0]))
 
 }
 
