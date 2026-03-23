@@ -11,7 +11,11 @@
 - [x] as a user goes over a square, the color changes
 - [x] if player goes over cut square - fail
 - [x] game intro state
+- [x] level end state - fail and success
+- [x] if all the squares are changed, the level ends
+- [x] level 1
 ___
-- [ ] level end state - fail and success
-- [ ] if all the squares are changed, the level ends
-- [ ] level 1
+- [ ] add multi level states
+- [ ] add obstacle to l2
+- [ ] level 2
+
