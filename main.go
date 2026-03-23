@@ -24,12 +24,15 @@ const (
 	sizeH      = offsetVal - 1
 )
 
-var introState = true
-var userKeyPress = false
-var playerPosX = 0
-var playerPosY = 0
-var gameState [4][4]int
-var levelFailed = false
+var (
+	levelStart   = true
+	introState   = true
+	userKeyPress = false
+	playerPosX   = 0
+	playerPosY   = 0
+	gameState    [4][4]int
+	levelFailed  = false
+)
 
 type Game struct {
 	keys []ebiten.Key
@@ -42,6 +45,15 @@ func init() {
 	}
 	mplusFaceSource = s
 }
+func resetGame() {
+	createGameState()
+	levelFailed = false
+	levelStart = true
+	time.Sleep(300 * time.Millisecond)
+	// introState = true
+	playerPosX = 0
+	playerPosY = 0
+}
 
 func (g *Game) Update() error {
 	g.keys = inpututil.AppendPressedKeys(g.keys[:0])
@@ -50,29 +62,33 @@ func (g *Game) Update() error {
 	if len(g.keys) != 0 {
 		userKeyPress = true
 		key := fmt.Sprintf("%v", g.keys[0])
+		levelStart = false
 		if introState && key == "Enter" {
 			introState = false
+			levelStart = true
+			resetGame()
+			// return nil
 		}
 		if key == "Escape" {
-			time.Sleep(300 * time.Millisecond)
 			if introState == true {
 				os.Exit(1)
 			}
 			introState = true
-			createGameState()
-			playerPosX = 0
-			playerPosY = 0
+			resetGame()
+			// return nil
 		}
 		if key == "w" || key == "W" || key == "ArrowUp" {
 			if playerPosY <= 0 {
-				playerPosY = 0
+				// playerPosY = 0
+				return nil
 			} else {
 				playerPosY -= offsetVal
 			}
 		}
 		if key == "a" || key == "A" || key == "ArrowLeft" {
 			if playerPosX <= 0 {
-				playerPosX = 0
+				return nil
+				// playerPosX = 0
 			} else {
 				playerPosX -= offsetVal
 			}
@@ -80,7 +96,8 @@ func (g *Game) Update() error {
 		if key == "s" || key == "S" || key == "ArrowDown" {
 			boundaryY := gameHeight - (offsetVal * 2)
 			if playerPosY >= boundaryY {
-				playerPosY = boundaryY
+				return nil
+				// playerPosY = boundaryY
 			} else {
 				playerPosY += offsetVal
 			}
@@ -88,7 +105,8 @@ func (g *Game) Update() error {
 		if key == "d" || key == "D" || key == "ArrowRight" {
 			boundaryX := gameWidth - (offsetVal * 2)
 			if playerPosX >= boundaryX {
-				playerPosX = boundaryX
+				return nil
+				// playerPosX = boundaryX
 			} else {
 				playerPosX += offsetVal
 			}
@@ -98,8 +116,14 @@ func (g *Game) Update() error {
 		if gameState[playerY][playerX] != 1 {
 			gameState[playerY][playerX] = 1
 		} else {
-			levelFailed = true
+			if playerX == 0 && playerY == 0 && levelStart == true {
+				levelFailed = false
+			} else {
+				fmt.Printf("level failed true. playerx %v playerY %v level start %v\n", playerX, playerY, levelStart)
+				levelFailed = true
+			}
 		}
+
 	}
 	return nil
 }
@@ -126,15 +150,26 @@ func introScreen(screen *ebiten.Image) {
 		Size:   normalFontSize,
 	}, op)
 
-	op.GeoM.Translate(0, 80)
+	op.GeoM.Translate(0, 30)
 	op.ColorScale.ScaleWithColor(color.White)
 	text.Draw(screen, subTit, &text.GoTextFace{
 		Source: mplusFaceSource,
 		Size:   normalFontSize,
 	}, op)
+	if levelFailed {
+		op.GeoM.Translate(0, 50)
+		op.ColorScale.ScaleWithColor(color.RGBA{125, 0, 0, 255})
+		text.Draw(screen, "Level Failed", &text.GoTextFace{
+			Source: mplusFaceSource,
+			Size:   normalFontSize,
+		}, op)
+	}
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
+	if levelFailed == true {
+		introState = true
+	}
 	if introState == true {
 		introScreen(screen)
 		return
@@ -178,16 +213,16 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 }
 
 func createGameState() {
-	for row := 0; row < (gameHeight-offsetVal)/sizeH; row++ {
-		for col := 0; col < (gameWidth-offsetVal)/sizeW; col++ {
-			if row == 0 && col == 0 {
-				gameState[row][col] = 1
-			} else {
-				gameState[row][col] = 0
-			}
+	// for row := 0; row < (gameHeight-offsetVal)/sizeH; row++ {
+	// 	for col := 0; col < (gameWidth-offsetVal)/sizeW; col++ {
+	// 		gameState[row][col] = 0
+	// 	}
+	// }
+	for row := 0; row < len(gameState); row++ {
+		for col := 0; col < len(gameState[row]); col++ {
+			gameState[row][col] = 0
 		}
 	}
-	// fmt.Printf("row len %v, col len %v ", len(gameState), len(gameState[0]))
 
 }
 
@@ -195,7 +230,8 @@ func main() {
 	ebiten.SetWindowSize(gameWidth*2, gameHeight*2)
 	ebiten.SetWindowTitle("Lawn Mowyer")
 
-	createGameState()
+	resetGame()
+	// createGameState()
 
 	if err := ebiten.RunGame(&Game{}); err != nil {
 		log.Fatal(err)

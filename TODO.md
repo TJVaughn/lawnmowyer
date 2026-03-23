@@ -10,8 +10,8 @@
 - [x] Add bounds to where they can move
 - [x] as a user goes over a square, the color changes
 - [x] if player goes over cut square - fail
+- [x] game intro state
 ___
-- [ ] game intro state
 - [ ] level end state - fail and success
 - [ ] if all the squares are changed, the level ends
 - [ ] level 1
