@@ -25,13 +25,14 @@ const (
 )
 
 var (
-	levelStart   = true
-	introState   = true
-	userKeyPress = false
-	playerPosX   = 0
-	playerPosY   = 0
-	gameState    [4][4]int
-	levelFailed  = false
+	levelStart     = true
+	introState     = true
+	userKeyPress   = false
+	playerPosX     = 0
+	playerPosY     = 0
+	gameState      [4][4]int
+	levelFailed    = false
+	isLevelSuccess = false
 )
 
 type Game struct {
@@ -53,6 +54,20 @@ func resetGame() {
 	// introState = true
 	playerPosX = 0
 	playerPosY = 0
+}
+
+func checkIsLevelSuccess() {
+	for row := 0; row < len(gameState); row++ {
+		for col := 0; col < len(gameState[row]); col++ {
+			if gameState[row][col] == 0 {
+				fmt.Printf("something still equal to zero %v %v \n", row, col)
+				fmt.Printf("player x %v y %v \n", playerPosX, playerPosY)
+				isLevelSuccess = false
+				return
+			}
+		}
+	}
+	isLevelSuccess = true
 }
 
 func (g *Game) Update() error {
@@ -123,7 +138,7 @@ func (g *Game) Update() error {
 				levelFailed = true
 			}
 		}
-
+		checkIsLevelSuccess()
 	}
 	return nil
 }
@@ -156,10 +171,19 @@ func introScreen(screen *ebiten.Image) {
 		Source: mplusFaceSource,
 		Size:   normalFontSize,
 	}, op)
-	if levelFailed {
+	if levelFailed || isLevelSuccess {
+		var msg string
+		var msgColor = color.RGBA{125, 0, 0, 255}
+		if levelFailed {
+			msg = "level failed"
+		} else {
+			msgColor = color.RGBA{0, 200, 0, 255}
+			msg = "level passed"
+		}
+
 		op.GeoM.Translate(0, 50)
-		op.ColorScale.ScaleWithColor(color.RGBA{125, 0, 0, 255})
-		text.Draw(screen, "Level Failed", &text.GoTextFace{
+		op.ColorScale.ScaleWithColor(msgColor)
+		text.Draw(screen, msg, &text.GoTextFace{
 			Source: mplusFaceSource,
 			Size:   normalFontSize,
 		}, op)
