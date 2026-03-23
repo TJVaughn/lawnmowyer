@@ -59,20 +59,31 @@ func resetGame() {
 func checkIsLevelSuccess() {
 	for row := 0; row < len(gameState); row++ {
 		for col := 0; col < len(gameState[row]); col++ {
+			pX := playerPosX / 100
+			pY := playerPosY / 100
+			if row == pY && col == pX {
+				gameState[row][col] = 1
+				fmt.Printf("p row%v:col%v \n", pY, pX)
+				fmt.Printf("g row%v:col%v \n", row, col)
+				// fmt.Printf("row is px, col is py\n")
+			}
 			if gameState[row][col] == 0 {
-				fmt.Printf("something still equal to zero %v %v \n", row, col)
-				fmt.Printf("player x %v y %v \n", playerPosX, playerPosY)
 				isLevelSuccess = false
 				return
 			}
+
 		}
 	}
 	isLevelSuccess = true
+	fmt.Printf("isLevelSuccess %v \n", isLevelSuccess)
 }
 
 func (g *Game) Update() error {
 	g.keys = inpututil.AppendPressedKeys(g.keys[:0])
 
+	if isLevelSuccess {
+		introState = true
+	}
 	// fmt.Printf("g keys: %v \n", len(g.keys))
 	if len(g.keys) != 0 {
 		userKeyPress = true
@@ -130,6 +141,7 @@ func (g *Game) Update() error {
 		playerY := playerPosY / 100
 		if gameState[playerY][playerX] != 1 {
 			gameState[playerY][playerX] = 1
+			fmt.Printf("setting row:%v col:%v\n", playerY, playerX)
 		} else {
 			if playerX == 0 && playerY == 0 && levelStart == true {
 				levelFailed = false
