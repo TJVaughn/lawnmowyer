@@ -9,9 +9,9 @@
 - [x] When user presses key, it only moves them 1 square
 - [x] Add bounds to where they can move
 - [x] as a user goes over a square, the color changes
+- [x] if player goes over cut square - fail
 ___
-- [ ] if all the squares are changed, the level ends
-- [ ] level end state - fail and success
 - [ ] game intro state
-- [ ] if player goes over incorrect square - level end state fail
-- [ ] map 1
+- [ ] level end state - fail and success
+- [ ] if all the squares are changed, the level ends
+- [ ] level 1

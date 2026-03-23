@@ -12,15 +12,19 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
+const (
+	gameWidth  = 500
+	gameHeight = 500
+	offsetVal  = 100
+	sizeW      = offsetVal - 1
+	sizeH      = offsetVal - 1
+)
+
 var userKeyPress = false
 var playerPosX = 0
 var playerPosY = 0
-var gameWidth = 500
-var gameHeight = 500
-var offsetVal = 100
-var sizeW = offsetVal - 1
-var sizeH = offsetVal - 1
 var gameState [4][4]int
+var levelFailed = false
 
 type Game struct {
 	keys []ebiten.Key
@@ -65,7 +69,11 @@ func (g *Game) Update() error {
 		}
 		playerX := playerPosX / 100
 		playerY := playerPosY / 100
-		gameState[playerY][playerX] = 1
+		if gameState[playerY][playerX] != 1 {
+			gameState[playerY][playerX] = 1
+		} else {
+			levelFailed = true
+		}
 	}
 	return nil
 }
@@ -74,8 +82,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// draw the map
 	offsetX := 0
 	offsetY := 0
-
-	ebitenutil.DebugPrint(screen, "Hello, World!")
 
 	for _, row := range gameState {
 		for _, col := range row {
@@ -91,16 +97,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		offsetX = 0
 		offsetY += offsetVal
 	}
-	// for row := 0; row < (gameHeight-offsetVal)/sizeH; row++ {
-	// 	for i := 0; i < (gameWidth-offsetVal)/sizeW; i++ {
-	// 		vector.FillRect(screen, float32(offsetX), float32(offsetY), float32(sizeW), float32(sizeH), color.RGBA{0, 255, 0, 255}, false)
-	//
-	// 		offsetX += offsetVal
-	// 		// offsetY += 10
-	// 	}
-	// 	offsetX = 0
-	// 	offsetY += offsetVal
-	// }
 
 	// draw player
 	vector.FillRect(screen, float32(playerPosX), float32(playerPosY), float32(sizeW), float32(sizeH), color.RGBA{255, 20, 80, 200}, false)
@@ -112,7 +108,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// if len(g.keys) != 0 {
 	// 	ebitenutil.DebugPrint(screen, fmt.Sprintf("%v", g.keys[0]))
 	// }
-	ebitenutil.DebugPrint(screen, fmt.Sprintf("X %v, Y %v", playerPosX, playerPosY))
+	// ebitenutil.DebugPrint(screen, fmt.Sprintf("X %v, Y %v", playerPosX, playerPosY))
+	ebitenutil.DebugPrint(screen, fmt.Sprintf("Level failed: %v", levelFailed))
 
 }
 
