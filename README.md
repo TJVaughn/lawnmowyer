@@ -17,3 +17,11 @@ Create a small game using golang
 - 10 puzzles
 - if user cuts same piece twice, puzzle failed
 
+### Dependencies
+- Go >= v1.26.0
+- Ebiten
+
+Packages:
+- [linux](https://ebitengine.org/en/documents/install.html?os=linux)
+- [mac](https://ebitengine.org/en/documents/install.html?os=darwin)
+- [win](https://ebitengine.org/en/documents/install.html?os=windows)
