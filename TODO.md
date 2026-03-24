@@ -19,3 +19,14 @@ ___
 - [ ] add obstacle to l2
 - [ ] level 2
 
+## Notes
+#### March 24, 2026
+Prioritizing other work today. Still need to add multi level states.
+
+I think a refactoring is in order regarding the coordinates system which will affect:
+- boundary logic
+- tile sizing
+- user-tile position
+
+This will enhance the games ability to handle different level sizes more gracefully,
+and will allow the UI to render reliably.
