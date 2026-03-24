@@ -17,20 +17,21 @@ import (
 )
 
 const (
-	gameWidth  = 500
-	gameHeight = 500
+	gameWidth  = 600
+	gameHeight = 600
 	offsetVal  = 100
 	sizeW      = offsetVal - 1
 	sizeH      = offsetVal - 1
 )
 
 var (
+	userLevel      = 1
 	levelStart     = true
 	introState     = true
 	userKeyPress   = false
 	playerPosX     = 0
 	playerPosY     = 0
-	gameState      [4][4]int
+	gameState      [5][5]int
 	levelFailed    = false
 	isLevelSuccess = false
 )
@@ -162,27 +163,41 @@ var (
 func introScreen(screen *ebiten.Image) {
 
 	const (
+		smallFontSize  = 18
 		normalFontSize = 24
 		bigFontSize    = 48
 	)
 	const x = 20
 	title := "Lawn Mowyer"
-	subTit := "Press Enter to Start"
+	subTit := "To Start, Press "
+	notes := "WASD/Arrow keys to move, ESC to exit"
 	op := &text.DrawOptions{}
-	// Draw the sample text
-	op.GeoM.Translate(10, 60)
+	op.GeoM.Translate(10, 10)
 	op.ColorScale.ScaleWithColor(color.White)
 	text.Draw(screen, title, &text.GoTextFace{
 		Source: mplusFaceSource,
-		Size:   normalFontSize,
+		Size:   bigFontSize,
 	}, op)
 
-	op.GeoM.Translate(0, 30)
+	op.GeoM.Translate(0, 300)
 	op.ColorScale.ScaleWithColor(color.White)
 	text.Draw(screen, subTit, &text.GoTextFace{
 		Source: mplusFaceSource,
 		Size:   normalFontSize,
 	}, op)
+	op.GeoM.Translate(180, -25)
+	op.ColorScale.ScaleWithColor(color.RGBA{0, 125, 200, 255})
+	text.Draw(screen, "Enter", &text.GoTextFace{
+		Source: mplusFaceSource,
+		Size:   bigFontSize,
+	}, op)
+	nOp := &text.DrawOptions{}
+	nOp.GeoM.Translate(10, 70)
+	nOp.ColorScale.ScaleWithColor(color.White)
+	text.Draw(screen, notes, &text.GoTextFace{
+		Source: mplusFaceSource,
+		Size:   smallFontSize,
+	}, nOp)
 	if levelFailed || isLevelSuccess {
 		var msg string
 		var msgColor = color.RGBA{125, 0, 0, 255}
@@ -210,6 +225,15 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		introScreen(screen)
 		return
 	}
+
+	levelText := fmt.Sprintf("Level: %v", userLevel)
+	op := &text.DrawOptions{}
+	op.GeoM.Translate(600, 10)
+	op.ColorScale.ScaleWithColor(color.White)
+	text.Draw(screen, levelText, &text.GoTextFace{
+		Source: mplusFaceSource,
+		Size:   24,
+	}, op)
 	// draw the map
 	offsetX := 0
 	offsetY := 0
@@ -249,11 +273,6 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 }
 
 func createGameState() {
-	// for row := 0; row < (gameHeight-offsetVal)/sizeH; row++ {
-	// 	for col := 0; col < (gameWidth-offsetVal)/sizeW; col++ {
-	// 		gameState[row][col] = 0
-	// 	}
-	// }
 	for row := 0; row < len(gameState); row++ {
 		for col := 0; col < len(gameState[row]); col++ {
 			gameState[row][col] = 0
