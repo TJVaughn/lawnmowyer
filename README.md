@@ -13,5 +13,4 @@ Create a small game using golang
 #### Scope:
 - intro screen
 - 10 puzzles
-- user can "cut grass"
 - if user cuts same piece twice, puzzle failed
