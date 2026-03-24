@@ -1,5 +1,7 @@
 # Lawn Mowyer
-## Puzzle game to cut your lawn
+### Puzzle game to cut your lawn
+## Run the game
+`go run github.com/tjvaughn/lawnmowyer@latest`
 
 #### Current Status:
 ![alt text](./docs/current-lawnmowyer.gif)
@@ -14,3 +16,4 @@ Create a small game using golang
 - intro screen
 - 10 puzzles
 - if user cuts same piece twice, puzzle failed
+
