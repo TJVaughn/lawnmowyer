@@ -16,24 +16,96 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
+type Level struct {
+	state [][]int
+}
+
 const (
-	gameWidth  = 600
-	gameHeight = 600
 	offsetVal  = 100
 	sizeW      = offsetVal - 1
 	sizeH      = offsetVal - 1
+	gameHeight = 700
+	gameWidth  = 700
 )
 
 var (
-	userLevel      = 1
+	userLevel      = 5
 	levelStart     = true
 	introState     = true
 	userKeyPress   = false
 	playerPosX     = 0
 	playerPosY     = 0
-	gameState      [5][5]int
+	gameState      [][]int
 	levelFailed    = false
 	isLevelSuccess = false
+	levels         = [8]Level{
+		{
+			state: [][]int{
+				{0, 0},
+				{0, 0},
+			},
+		},
+		{
+			state: [][]int{
+				{0, 0, 0},
+				{0, 2, 0},
+				{0, 0, 0},
+			},
+		},
+		{
+			state: [][]int{
+				{0, 0, 0, 2},
+				{0, 2, 0, 0},
+				{0, 2, 2, 0},
+				{0, 0, 0, 0},
+			},
+		},
+		{
+			state: [][]int{
+				{0, 0, 0, 2, 2},
+				{2, 2, 0, 0, 0},
+				{2, 2, 0, 2, 0},
+				{0, 0, 0, 0, 0},
+				{0, 0, 0, 0, 2},
+			},
+		},
+		{
+			state: [][]int{
+				{0, 2, 0, 0, 0, 2, 0, 0},
+				{0, 0, 0, 2, 0, 0, 0, 0},
+				{2, 2, 2, 0, 2, 2, 2, 0},
+				{2, 0, 0, 0, 2, 2, 0, 0},
+				{0, 0, 2, 2, 0, 0, 0, 0},
+				{0, 2, 0, 0, 0, 0, 2, 0},
+				{0, 0, 0, 0, 0, 0, 2, 0},
+				{0, 0, 2, 0, 0, 0, 0, 0},
+			},
+		},
+		{
+			state: [][]int{
+				{0, 0, 0},
+				{0, 3, 0},
+				{0, 0, 0},
+			},
+		},
+		{
+			state: [][]int{
+				{0, 3, 0, 0},
+				{0, 2, 3, 0},
+				{0, 0, 2, 0},
+				{3, 0, 0, 0},
+			},
+		},
+		{
+			state: [][]int{
+				{0, 3, 0, 0},
+				{0, 0, 0, 0},
+				{3, 2, 3, 0},
+				{0, 0, 2, 0},
+				{3, 0, 0, 0},
+			},
+		},
+	}
 )
 
 type Game struct {
@@ -64,9 +136,6 @@ func checkIsLevelSuccess() {
 			pY := playerPosY / 100
 			if row == pY && col == pX {
 				gameState[row][col] = 1
-				fmt.Printf("p row%v:col%v \n", pY, pX)
-				fmt.Printf("g row%v:col%v \n", row, col)
-				// fmt.Printf("row is px, col is py\n")
 			}
 			if gameState[row][col] == 0 {
 				isLevelSuccess = false
@@ -76,12 +145,17 @@ func checkIsLevelSuccess() {
 		}
 	}
 	isLevelSuccess = true
-	fmt.Printf("isLevelSuccess %v \n", isLevelSuccess)
+	userLevel += 1
+	fmt.Printf("isLevelSuccess %v. level %v \n", isLevelSuccess, userLevel)
+
+	if userLevel >= len(levels) {
+		userLevel = 0
+	}
 }
 
 func (g *Game) Update() error {
 	g.keys = inpututil.AppendPressedKeys(g.keys[:0])
-
+	level := levels[userLevel]
 	if isLevelSuccess {
 		introState = true
 	}
@@ -94,7 +168,6 @@ func (g *Game) Update() error {
 			introState = false
 			levelStart = true
 			resetGame()
-			// return nil
 		}
 		if key == "Escape" {
 			if introState == true {
@@ -106,7 +179,6 @@ func (g *Game) Update() error {
 		}
 		if key == "w" || key == "W" || key == "ArrowUp" {
 			if playerPosY <= 0 {
-				// playerPosY = 0
 				return nil
 			} else {
 				playerPosY -= offsetVal
@@ -115,34 +187,36 @@ func (g *Game) Update() error {
 		if key == "a" || key == "A" || key == "ArrowLeft" {
 			if playerPosX <= 0 {
 				return nil
-				// playerPosX = 0
 			} else {
 				playerPosX -= offsetVal
 			}
 		}
 		if key == "s" || key == "S" || key == "ArrowDown" {
-			boundaryY := gameHeight - (offsetVal * 2)
+			heightB := len(level.state) * 100
+			boundaryY := heightB - offsetVal
 			if playerPosY >= boundaryY {
 				return nil
-				// playerPosY = boundaryY
 			} else {
 				playerPosY += offsetVal
 			}
 		}
 		if key == "d" || key == "D" || key == "ArrowRight" {
-			boundaryX := gameWidth - (offsetVal * 2)
+			widthB := len(level.state[0]) * 100
+			boundaryX := widthB - offsetVal
 			if playerPosX >= boundaryX {
 				return nil
-				// playerPosX = boundaryX
 			} else {
 				playerPosX += offsetVal
 			}
 		}
 		playerX := playerPosX / 100
 		playerY := playerPosY / 100
-		if gameState[playerY][playerX] != 1 {
+		if gameState[playerY][playerX] == 2 {
+			fmt.Printf("level failed true. playerx %v playerY %v level start %v\n", playerX, playerY, levelStart)
+			levelFailed = true
+		}
+		if gameState[playerY][playerX] == 0 {
 			gameState[playerY][playerX] = 1
-			fmt.Printf("setting row:%v col:%v\n", playerY, playerX)
 		} else {
 			if playerX == 0 && playerY == 0 && levelStart == true {
 				levelFailed = false
@@ -199,21 +273,20 @@ func introScreen(screen *ebiten.Image) {
 		Size:   smallFontSize,
 	}, nOp)
 	if levelFailed || isLevelSuccess {
-		var msg string
-		var msgColor = color.RGBA{125, 0, 0, 255}
-		if levelFailed {
-			msg = "level failed"
-		} else {
+		var msgColor = color.RGBA{255, 50, 50, 255}
+		var msg = "level failed"
+		if isLevelSuccess {
 			msgColor = color.RGBA{0, 200, 0, 255}
 			msg = "level passed"
 		}
 
-		op.GeoM.Translate(0, 50)
-		op.ColorScale.ScaleWithColor(msgColor)
+		fOp := &text.DrawOptions{}
+		fOp.GeoM.Translate(200, 350)
+		fOp.ColorScale.ScaleWithColor(msgColor)
 		text.Draw(screen, msg, &text.GoTextFace{
 			Source: mplusFaceSource,
 			Size:   normalFontSize,
-		}, op)
+		}, fOp)
 	}
 }
 
@@ -226,7 +299,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		return
 	}
 
-	levelText := fmt.Sprintf("Level: %v", userLevel)
+	levelText := fmt.Sprintf("Level: %v", userLevel+1)
 	op := &text.DrawOptions{}
 	op.GeoM.Translate(600, 10)
 	op.ColorScale.ScaleWithColor(color.White)
@@ -240,10 +313,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	for _, row := range gameState {
 		for _, col := range row {
-			// fmt.Println("%v", col)
 			cellColor := color.RGBA{0, 255, 0, 255}
 			if col == 1 {
 				cellColor = color.RGBA{0, 120, 0, 255}
+			}
+			if col == 2 {
+				cellColor = color.RGBA{100, 75, 50, 255}
 			}
 			vector.FillRect(screen, float32(offsetX), float32(offsetY), float32(sizeW), float32(sizeH), cellColor, false)
 
@@ -260,25 +335,26 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		time.Sleep(150 * time.Millisecond)
 		userKeyPress = false
 	}
-	// if len(g.keys) != 0 {
-	// 	ebitenutil.DebugPrint(screen, fmt.Sprintf("%v", g.keys[0]))
-	// }
-	// ebitenutil.DebugPrint(screen, fmt.Sprintf("X %v, Y %v", playerPosX, playerPosY))
-	ebitenutil.DebugPrint(screen, fmt.Sprintf("Level failed: %v", levelFailed))
+	ebitenutil.DebugPrint(screen, fmt.Sprintf("Level: %v", userLevel+1))
 
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
 	return gameWidth + offsetVal, gameHeight + offsetVal
 }
+func copyState(src [][]int) [][]int {
+	dst := make([][]int, len(src))
+	for i := range src {
+		dst[i] = make([]int, len(src[i]))
+		copy(dst[i], src[i])
+	}
+	return dst
+}
 
 func createGameState() {
-	for row := 0; row < len(gameState); row++ {
-		for col := 0; col < len(gameState[row]); col++ {
-			gameState[row][col] = 0
-		}
-	}
-
+	level := levels[userLevel]
+	gameState = copyState(level.state)
+	fmt.Printf("game state: %v\n", gameState)
 }
 
 func main() {
@@ -286,7 +362,6 @@ func main() {
 	ebiten.SetWindowTitle("Lawn Mowyer")
 
 	resetGame()
-	// createGameState()
 
 	if err := ebiten.RunGame(&Game{}); err != nil {
 		log.Fatal(err)
