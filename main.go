@@ -29,7 +29,7 @@ const (
 )
 
 var (
-	userLevel      = 5
+	userLevel      = 0
 	levelStart     = true
 	introState     = true
 	userKeyPress   = false
@@ -37,6 +37,7 @@ var (
 	playerPosY     = 0
 	gameState      [][]int
 	levelFailed    = false
+	hiddenBlockHit = false
 	isLevelSuccess = false
 	levels         = [8]Level{
 		{
@@ -211,6 +212,11 @@ func (g *Game) Update() error {
 		}
 		playerX := playerPosX / 100
 		playerY := playerPosY / 100
+		if gameState[playerY][playerX] == 3 {
+			fmt.Printf("level failed true. playerx %v playerY %v level start %v\n", playerX, playerY, levelStart)
+			levelFailed = true
+			hiddenBlockHit = true
+		}
 		if gameState[playerY][playerX] == 2 {
 			fmt.Printf("level failed true. playerx %v playerY %v level start %v\n", playerX, playerY, levelStart)
 			levelFailed = true
@@ -275,6 +281,9 @@ func introScreen(screen *ebiten.Image) {
 	if levelFailed || isLevelSuccess {
 		var msgColor = color.RGBA{255, 50, 50, 255}
 		var msg = "level failed"
+		if hiddenBlockHit {
+			msg = "Level Failed, hidden block hit"
+		}
 		if isLevelSuccess {
 			msgColor = color.RGBA{0, 200, 0, 255}
 			msg = "level passed"
